@@ -1,65 +1,11 @@
 import express, { Request, Response, NextFunction } from "express";
-import { verifyWebhookSignature } from "@hookdeck/sdk/webhooks/helpers";
 import crypto from "crypto";
-import nodemailer from "nodemailer";
-
 import { IncomingHttpHeaders } from "http";
 import { Request as ExpressRequest } from "express";
 
-const SECRET: string = import.meta.env.VITE_HOOKDECK_SIGNING_SECRET || "";
-
 const router = express.Router();
 
-if (!SECRET) {
-  console.warn("No Hookdeck Signing Secret set!");
-}
-// console.log({ SECRET });
 
-const verifyHookdeckSignature = async (
-  req: ExpressRequest,
-  res: Response,
-  next: NextFunction
-) => {
-  // TESTING MODE: Signature verification disabled
-  console.warn("⚠️  WEBHOOK SIGNATURE VERIFICATION DISABLED - TESTING MODE ONLY");
-  return next();
-
-  if (!SECRET) {
-    console.warn(
-      "No Hookdeck Signing Secret: Skipping webhook verification. Do not do this in production!"
-    );
-    return next();
-  }
-
-  const headers: { [key: string]: string } = {};
-  const incomingHeaders = req.headers as IncomingHttpHeaders;
-
-  for (const [key, value] of Object.entries(incomingHeaders)) {
-    headers[key] = value as string;
-  }
-
-  // console.log({ headers });
-
-  const rawBody = req.rawBody.toString();
-  // console.log({ rawBody });
-
-  const result = await verifyWebhookSignature({
-    headers,
-    rawBody,
-    signingSecret: SECRET,
-    config: {
-      checkSourceVerification: false,
-    },
-  });
-
-  if (!result.isValidSignature) {
-    console.log("Signature is invalid, rejected");
-    res.sendStatus(401);
-  } else {
-    console.log("Signature is valid, accepted");
-    next();
-  }
-};
 
 router.get("/", (req: Request, res: Response) => {
   res.send("Welcome to the Webhooks API");
@@ -68,7 +14,6 @@ router.get("/", (req: Request, res: Response) => {
 // TEST
 router.post(
   "/testing",
-  verifyHookdeckSignature,
   (req: Request, res: Response) => {
     console.log(req.headers);
     res.send("Tested");
@@ -78,7 +23,6 @@ router.post(
 // PAYMENTS
 router.post(
   "/stripe-webhooks-endpoint",
-  verifyHookdeckSignature,
   (req: Request, res: Response) => {
     console.log(req.body);
     res.send("Stripe: Successfully received Webhook request");
@@ -87,7 +31,6 @@ router.post(
 
 router.post(
   "/paypal-webhooks-endpoint",
-  verifyHookdeckSignature,
   (req: Request, res: Response) => {
     console.log(req.body);
     res.send("Paypal: Successfully received Webhook request");
@@ -96,7 +39,6 @@ router.post(
 
 router.post(
   "/paddle-webhooks-endpoint",
-  verifyHookdeckSignature,
   (req: Request, res: Response) => {
     console.log(req.body);
     res.send("Paddle: Successfully received Webhook request");
@@ -105,7 +47,6 @@ router.post(
 
 router.post(
   "/checkout-webhooks-endpoint",
-  verifyHookdeckSignature,
   (req: Request, res: Response) => {
     console.log(req.body);
     res.send("Checkout: Successfully received Webhook request");
@@ -115,7 +56,6 @@ router.post(
 // CI/CD
 router.post(
   "/github-webhooks-endpoint",
-  verifyHookdeckSignature,
   (req: Request, res: Response) => {
     console.log(req.body);
     res.send("GitHub: Successfully received Webhook request");
@@ -124,7 +64,6 @@ router.post(
 
 router.post(
   "/gitlab-webhooks-endpoint",
-  verifyHookdeckSignature,
   (req: Request, res: Response) => {
     console.log(req.body);
     res.send("Gitlab: Successfully received Webhook request");
@@ -133,7 +72,6 @@ router.post(
 
 router.post(
   "/bitbucket-webhooks-endpoint",
-  verifyHookdeckSignature,
   (req: Request, res: Response) => {
     console.log(req.body);
     res.send("Bitbucket: Successfully received Webhook request");
@@ -142,7 +80,6 @@ router.post(
 
 router.post(
   "/docker-webhooks-endpoint",
-  verifyHookdeckSignature,
   (req: Request, res: Response) => {
     console.log(req.body);
     res.send("Docker: Successfully received Webhook request");
@@ -182,8 +119,6 @@ function verifyShopifySignature(req, res, next) {
 
 router.post(
   "/shopify-webhooks-endpoint",
-  verifyHookdeckSignature,
-  verifyShopifySignature,
   (req: Request, res: Response) => {
     console.log(req.body);
     res.send("Shopify: Successfully received Webhook request");
@@ -192,7 +127,6 @@ router.post(
 
 router.post(
   "/bigcommerce-webhooks-endpoint",
-  verifyHookdeckSignature,
   (req: Request, res: Response) => {
     console.log(req.body);
     res.send("BigCommerce Successfully received Webhook request");
@@ -201,7 +135,6 @@ router.post(
 
 router.post(
   "/woocommerce-webhooks-endpoint",
-  verifyHookdeckSignature,
   (req: Request, res: Response) => {
     console.log(req.body);
     res.send("WooCommerce: Successfully received Webhook request");
@@ -210,7 +143,6 @@ router.post(
 
 router.post(
   "/commercelayer-webhooks-endpoint",
-  verifyHookdeckSignature,
   (req: Request, res: Response) => {
     console.log(req.body);
     res.send("Commerce Layer: Successfully received Webhook request");
@@ -220,7 +152,6 @@ router.post(
 // CRM
 router.post(
   "/hubspot-webhooks-endpoint",
-  verifyHookdeckSignature,
   (req: Request, res: Response) => {
     console.log(req.body);
     res.send("HubSpot: Successfully received Webhook request");
@@ -229,7 +160,6 @@ router.post(
 
 router.post(
   "/pipedrive-webhooks-endpoint",
-  verifyHookdeckSignature,
   (req: Request, res: Response) => {
     console.log(req.body);
     res.send("Pipedrive: Successfully received Webhook request");
@@ -239,7 +169,6 @@ router.post(
 // EXTRAS
 router.post(
   "/okta-webhooks-endpoint",
-  verifyHookdeckSignature,
   (req: Request, res: Response) => {
     console.log(req.body);
     res.send("Okta Event hook Successfully received");
@@ -339,7 +268,7 @@ const sendEmailViaMSG91Template = async (
             },
           ],
           variables: {
-                      // Template variable for name
+            // Template variable for name
             otp: 123456,        // Template variable for email
             submission_time: new Date().toLocaleString(),  // Template variable for timestamp
           },
@@ -357,7 +286,7 @@ const sendEmailViaMSG91Template = async (
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "authkey":MSG91_API_KEY,
+        "authkey": MSG91_API_KEY,
       },
       body: JSON.stringify(emailPayload),
     });
@@ -368,8 +297,8 @@ const sendEmailViaMSG91Template = async (
 
     // Check various success responses
     if (
-      response.ok || 
-      responseData.request_id || 
+      response.ok ||
+      responseData.request_id ||
       responseData.type === "success" ||
       (responseData.status && responseData.status !== "fail")
     ) {
@@ -381,7 +310,7 @@ const sendEmailViaMSG91Template = async (
       console.error("   Error:", responseData.errors);
       console.error("   Code:", responseData.code);
       console.error("   API Error:", responseData.apiError);
-      
+
       // Provide specific guidance
       if (responseData.code === "401" || responseData.apiError === "418") {
         console.error("\n🔧 TROUBLESHOOTING:");
@@ -389,7 +318,7 @@ const sendEmailViaMSG91Template = async (
         console.error("   2. Your API Key may be expired - get a new one from MSG91 dashboard");
         console.error("   3. Make sure the API Key is active and not revoked");
       }
-      
+
       return false;
     }
   } catch (error) {
@@ -401,7 +330,6 @@ const sendEmailViaMSG91Template = async (
 // FACEBOOK LEAD FORM WEBHOOK
 router.post(
   "/facebook-lead-webhook",
-  verifyHookdeckSignature,
   async (req: Request, res: Response) => {
     try {
       console.log("📱 Facebook Lead Form Webhook Received");
@@ -409,7 +337,7 @@ router.post(
 
       // Extract lead data from Facebook webhook
       const leadData = req.body.entry?.[0]?.changes?.[0]?.value;
-      
+
       if (!leadData) {
         console.warn("⚠️  Invalid lead data structure");
         return res.status(400).send("Invalid lead data");
@@ -421,7 +349,7 @@ router.post(
       console.log(`📧 Sending email to lead: ${leadName} (${leadEmail})`);
 
       // Send email to the LEAD via MSG91 Email Template API
-      const emailSent = await sendEmailViaMSG91Template(leadEmail, leadName,leadEmail);
+      const emailSent = await sendEmailViaMSG91Template(leadEmail, leadName, leadEmail);
 
       if (emailSent) {
         res.status(200).send("Facebook Lead: Successfully processed and confirmation email sent to lead via MSG91 Template API");
