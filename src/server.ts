@@ -2,6 +2,7 @@ import express from "express";
 import routes from "./routes";
 import bodyParser from "body-parser";
 import "dotenv/config";
+import ngrok from "@ngrok/ngrok";
 
 // App
 const app = express();
@@ -20,4 +21,23 @@ app.set("port", port);
 app.use("/", routes);
 
 // Server
-app.listen(port, () => console.log(`Server running on localhost:${port}`));
+app.listen(port, async () => {
+  console.log(`Server running on localhost:${port}`);
+
+  // Automatically start an Ngrok tunnel for external inbound if token is provided
+  if (process.env.NGROK_AUTHTOKEN) {
+    try {
+      console.log("Starting Ngrok tunnel...");
+      const listener = await ngrok.forward({ 
+        addr: port, 
+        authtoken: process.env.NGROK_AUTHTOKEN 
+      });
+      console.log(`🌍 Ngrok Ingress established at: ${listener.url()}`);
+      console.log(`👉 Use this URL to configure your external webhooks.`);
+    } catch (error) {
+      console.error("❌ Failed to start Ngrok tunnel:", error);
+    }
+  } else {
+    console.log("ℹ️ Provide NGROK_AUTHTOKEN in .env to expose this server externally.");
+  }
+});

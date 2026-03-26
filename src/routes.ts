@@ -241,6 +241,7 @@ const sendEmailViaMSG91Template = async (
     const MSG91_TEMPLATE_ID = import.meta.env.VITE_MSG91_TEMPLATE_ID;
     const MSG91_FROM_EMAIL = import.meta.env.VITE_MSG91_FROM_EMAIL;
     const MSG91_REGISTERED_DOMAIN = import.meta.env.VITE_MSG91_REGISTERED_DOMAIN;
+    console.log(MSG91_FROM_EMAIL);
 
     // Validate template configuration
     if (!MSG91_API_KEY) {
@@ -294,6 +295,7 @@ const sendEmailViaMSG91Template = async (
     const responseData = await response.json();
 
     console.log("📥 Response Status:", response.status);
+    // console.log("📥 Response Data:", responseData);
 
     // Check various success responses
     if (
@@ -328,6 +330,26 @@ const sendEmailViaMSG91Template = async (
 };
 
 // FACEBOOK LEAD FORM WEBHOOK
+// Handle Facebook Webhook Verification (Required by Meta)
+router.get("/facebook-lead-webhook", (req: Request, res: Response) => {
+  const VERIFY_TOKEN = process.env.VITE_FACEBOOK_VERIFY_TOKEN || "my_secure_verify_token";
+
+  const mode = req.query["hub.mode"];
+  const token = req.query["hub.verify_token"];
+  const challenge = req.query["hub.challenge"];
+
+  if (mode && token) {
+    if (mode === "subscribe" && token === VERIFY_TOKEN) {
+      console.log("✅ Facebook Webhook Verified!");
+      res.status(200).send(challenge);
+    } else {
+      res.sendStatus(403);
+    }
+  } else {
+    res.status(400).send("Missing parameters");
+  }
+});
+
 router.post(
   "/facebook-lead-webhook",
   async (req: Request, res: Response) => {
@@ -337,6 +359,7 @@ router.post(
 
       // Extract lead data from Facebook webhook
       const leadData = req.body.entry?.[0]?.changes?.[0]?.value;
+      console.log("📥 Response Data From Facebook:", leadData);
 
       if (!leadData) {
         console.warn("⚠️  Invalid lead data structure");
