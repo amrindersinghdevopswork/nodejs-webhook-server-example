@@ -28,9 +28,9 @@ app.listen(port, async () => {
   if (process.env.NGROK_AUTHTOKEN) {
     try {
       console.log("Starting Ngrok tunnel...");
-      const listener = await ngrok.forward({ 
-        addr: port, 
-        authtoken: process.env.NGROK_AUTHTOKEN 
+      const listener = await ngrok.forward({
+        addr: port,
+        authtoken: process.env.NGROK_AUTHTOKEN
       });
       console.log(`🌍 Ngrok Ingress established at: ${listener.url()}`);
       console.log(`👉 Use this URL to configure your external webhooks.`);

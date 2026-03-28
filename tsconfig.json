@@ -1,13 +1,18 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "module": "esnext",
-    "moduleResolution": "Bundler",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
     "strict": false,
     "esModuleInterop": true,
     "outDir": "./dist",
     "rootDir": "./src"
   },
-  "include": ["src/**/*", "types/*"],
-  "exclude": ["node_modules"]
+  "include": [
+    "src/**/*",
+    "types/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

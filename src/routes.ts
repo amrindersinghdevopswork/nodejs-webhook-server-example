@@ -180,12 +180,12 @@ router.post(
 // MSG91 SMTP Email Service
 // const sendEmailViaMSG91SMTP = async (recipientEmail: string, leadName: string, leadEmail: string): Promise<boolean> => {
 //   try {
-//     const MSG91_SMTP_HOST = import.meta.env.VITE_MSG91_SMTP_HOST;
-//     const MSG91_SMTP_PORT = import.meta.env.VITE_MSG91_SMTP_PORT || "587";
-//     const MSG91_SMTP_USER = import.meta.env.VITE_MSG91_SMTP_USER;
-//     const MSG91_SMTP_PASSWORD = import.meta.env.VITE_MSG91_SMTP_PASSWORD;
-//     const MSG91_SENDER_EMAIL = import.meta.env.VITE_MSG91_SENDER_EMAIL;
-//     const MSG91_SENDER_NAME = import.meta.env.VITE_MSG91_SENDER_NAME || "Webhook Server";
+//     const MSG91_SMTP_HOST = process.env.VITE_MSG91_SMTP_HOST;
+//     const MSG91_SMTP_PORT = process.env.VITE_MSG91_SMTP_PORT || "587";
+//     const MSG91_SMTP_USER = process.env.VITE_MSG91_SMTP_USER;
+//     const MSG91_SMTP_PASSWORD = process.env.VITE_MSG91_SMTP_PASSWORD;
+//     const MSG91_SENDER_EMAIL = process.env.VITE_MSG91_SENDER_EMAIL;
+//     const MSG91_SENDER_NAME = process.env.VITE_MSG91_SENDER_NAME || "Webhook Server";
 
 //     // Validate SMTP credentials
 //     if (!MSG91_SMTP_HOST || !MSG91_SMTP_USER || !MSG91_SMTP_PASSWORD) {
@@ -237,10 +237,10 @@ const sendEmailViaMSG91Template = async (
   leadEmail: string,
 ): Promise<boolean> => {
   try {
-    const MSG91_API_KEY = import.meta.env.VITE_MSG91_API_KEY;
-    const MSG91_TEMPLATE_ID = import.meta.env.VITE_MSG91_TEMPLATE_ID;
-    const MSG91_FROM_EMAIL = import.meta.env.VITE_MSG91_FROM_EMAIL;
-    const MSG91_REGISTERED_DOMAIN = import.meta.env.VITE_MSG91_REGISTERED_DOMAIN;
+    const MSG91_API_KEY = process.env.VITE_MSG91_API_KEY;
+    const MSG91_TEMPLATE_ID = process.env.VITE_MSG91_TEMPLATE_ID;
+    const MSG91_FROM_EMAIL = process.env.VITE_MSG91_FROM_EMAIL;
+    const MSG91_REGISTERED_DOMAIN = process.env.VITE_MSG91_REGISTERED_DOMAIN;
     console.log(MSG91_FROM_EMAIL);
 
     // Validate template configuration
