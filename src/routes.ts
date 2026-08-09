@@ -356,18 +356,61 @@ router.post(
     try {
       console.log("📱 Facebook Lead Form Webhook Received");
       // console.log("Payload:", JSON.stringify(req.body, null, 2));
+      console.log
 
       // Extract lead data from Facebook webhook
       const leadData = req.body.entry?.[0]?.changes?.[0]?.value;
       console.log("📥 Response Data From Facebook:", leadData);
 
-      if (!leadData) {
-        console.warn("⚠️  Invalid lead data structure");
+      const leadgenId = leadData?.leadgen_id;
+      console.log("🔑 Leadgen ID:", leadgenId);
+
+      if (!leadData || !leadgenId) {
+        console.warn("⚠️  Invalid lead data structure: missing leadgen_id");
         return res.status(400).send("Invalid lead data");
       }
 
-      const leadName = leadData.name || "Unknown";
-      const leadEmail = leadData.email || "no-email@provided.com";
+      let leadName = leadData.name || "Unknown";
+      let leadEmail = leadData.email || "no-email@provided.com";
+      console.log("Lead Name:", leadName);
+      console.log("Lead Email:", leadEmail);
+
+      // If the payload already contains name and email (e.g., from a test payload), skip the Graph API fetch
+      if (leadName !== "Unknown" && leadEmail !== "no-email@provided.com") {
+        console.log("🛠️  Testing/Mock payload detected, bypassing Graph API fetch.");
+      } else {
+        const PAGE_ACCESS_TOKEN = process.env.VITE_FACEBOOK_PAGE_ACCESS_TOKEN;
+        if (!PAGE_ACCESS_TOKEN) {
+          console.error("❌ VITE_FACEBOOK_PAGE_ACCESS_TOKEN not configured in .env");
+          return res.status(500).send("Server configuration error");
+        }
+
+        // Fetch the actual lead details (name, email) from Facebook Graph API
+        const graphApiUrl = `https://graph.facebook.com/v19.0/${leadgenId}?access_token=${PAGE_ACCESS_TOKEN}`;
+        console.log(`🌐 Fetching actual lead payload from Facebook URL: https://graph.facebook.com/v19.0/${leadgenId}...`);
+
+        const graphResponse = await fetch(graphApiUrl);
+        const graphData = await graphResponse.json();
+
+        if (!graphResponse.ok) {
+          console.error("❌ Error fetching from Facebook Graph API:", graphData);
+          return res.status(500).send("Failed to fetch lead data from Facebook");
+        }
+
+        console.log("📥 Actual Lead Payload from Facebook Graph API:", JSON.stringify(graphData, null, 2));
+
+        if (graphData.field_data && Array.isArray(graphData.field_data)) {
+          for (const field of graphData.field_data) {
+            if (field.name === "email" && field.values && field.values.length > 0) {
+              leadEmail = field.values[0];
+            } else if ((field.name === "full_name" || field.name === "name" || field.name === "first_name") && field.values && field.values.length > 0) {
+              leadName = field.name === "first_name" ? (leadName === "Unknown" ? field.values[0] : `${field.values[0]} ${leadName}`) : field.values[0];
+            } else if (field.name === "last_name" && field.values && field.values.length > 0) {
+              leadName = leadName === "Unknown" ? field.values[0] : `${leadName} ${field.values[0]}`;
+            }
+          }
+        }
+      }
 
       console.log(`📧 Sending email to lead: ${leadName} (${leadEmail})`);
 
