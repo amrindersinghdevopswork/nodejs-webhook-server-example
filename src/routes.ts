@@ -11,6 +11,10 @@ router.get("/", (req: Request, res: Response) => {
   res.send("Welcome to the Webhooks API");
 });
 
+router.get("/ping", (req: Request, res: Response) => {
+  res.status(200).send("pong");
+});
+
 // TEST
 router.post(
   "/testing",
